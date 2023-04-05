@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, abort
+from flask import Flask, jsonify, request, abort
 import hashlib                                              # used for MD5 Hash
 import requests                                             # used for slack alert
 import requests
@@ -142,6 +142,133 @@ def slack_alert(post):
             input=post,
             output=flag
         )
+
+
+#########################################
+#########################################
+#########################################
+## CRUD functions #######################
+
+@app.route("/keyval", methods=["POST", "PUT"])
+
+def POST():
     
+    user_input = request.get_json()
+    
+    if request.method == "POST":
+        
+        cmd = "CREATE " + user_input["key"] + "/" + user_input["value"]
+        
+        if r.exists(user_input["key"]):
+            #build return val to return if key is found
+            KeyFound = {
+                "Key" : user_input["key"],
+                "Value" : user_input["value"],
+                "Command" : cmd,
+                "Result" : False,
+                "Error" : "Unable to add key pair: key already exists"
+            }
+            # return json object and abort code
+            return jsonify(KeyFound), abort(409)
+        # if key is not found
+        else:
+            key = user_input["key"]
+            value = user_input["value"]
+            r.set(key, value)
+
+            #build return val to return if key is not found
+            createKeyVal = {
+                "Key" : key,
+                "Value" : value,
+                "Command" : cmd,
+                "Result" : True,
+                "Error" : ""
+            }
+            return jsonify(createKeyVal), 200
+        
+    elif request.method == "PUT":
+
+        cmd = "CREATE " + user_input["key"] + "/" + user_input["value"]
+        key = user_input["key"]
+        value = user_input["value"]
+
+        if r.exists(user_input["key"]):
+            r.set(key, value)
+
+            keypair = {
+                "Key" : key,
+                "Value" : value,
+                "Command" : cmd,
+                "Result" : True,
+                "Error" : ""
+            }
+            return jsonify(keypair)
+        else:
+            keypair = {
+                "Key" : key,
+                "Value" : value,
+                "Command" : cmd,
+                "Result" : False,
+                "Error" : "Key not found"
+            }
+            return jsonify(keypair)
+
+
+@app.route("/keyval/<string:input>", methods=['GET', 'DELETE'])
+def GET(input):
+
+    if request.method == 'GET':
+
+        cmd = "READ value for key " + input
+
+        if r.exists(input):
+            value = r.get(input)
+            keypair = {
+                "Key" : input,
+                "Value" : value,
+                "Command" : cmd,
+                "Result" : True,
+                "Error" : ""
+            }
+            return jsonify(keypair)
+        else:
+            keypair = {
+                "Key" : input,
+                "Value" : value,
+                "Command" : cmd,
+                "Result" : False,
+                "Error" : "Key not found"
+            }
+            return jsonify(keypair)
+        
+    elif request.method == 'DELETE':
+
+        cmd = "DELETE value for key " + input
+
+        if r.exists(input) == 1:
+            value = r.get(input)
+            r.delete(input)
+            keypair = {
+                "Key" : input,
+                "Value" : value,
+                "Command" : cmd,
+                "Result" : True,
+                "Error" : ""
+            }
+            return jsonify(keypair)
+        else:
+            keypair = {
+                "Key" : input,
+                "Value" : value,
+                "Command" : cmd,
+                "Result" : False,
+                "Error" : "Unable to delete key: Key not found"
+            }
+            return jsonify(keypair)
+             
+
+
+
+
 if __name__ == "__main__":                                  # debug mode for testing, port 4000 as per assignment instructions
     app.run(host='0.0.0.0',port=4000, debug=True)
