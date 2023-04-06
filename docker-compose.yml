@@ -1,12 +1,13 @@
 version: '3'
 services:
   api:
-    container-name: flask-container
+    container_name: flask-container
     build: .
     entrypoint: python main.py 
     ports: 
       - "4000:4000"
-    depends_on: redis                   
+    depends_on: 
+      - redis                   
   redis:
     image: redis:latest
     container_name: redis-container
