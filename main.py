@@ -21,7 +21,6 @@ slackURL = "https://hooks.slack.com/services/T257UBDHD/B04RF60GQAV/2xDEtfoGN0Nxl
 def hello_world():
     return "<p>Howdy! We are Group 4. This is our API.</p>"
 
-
 #MD5
 @app.route("/md5/<string:strvalue>")
 
@@ -149,61 +148,7 @@ def slack_alert(post):
         )
 
 
-@app.route("/keyval", methods=[ "POST", "PUT"])
-def postKeyval():
-    data = request.get_json()
-    
-    if request.method == 'POST':
-       command = "Create " + data["key"] + "/" + data["value"]
-       if r.exists(data["key"]):
-           #create object to return if it exists
-           keypair_found = {
-               "storage-key": data["key"],
-               "storage-val": data["value"],
-               "command": command,
-               "result": False,
-               "error": "Unable to add key pair: key already exists"
-           } 
-           return jsonify(keypair_found), abort(409)
-       else:
-           key = data["key"]
-           value = data[value]
-           r.set(key, value)
-
-           keypair = {
-               "storage-key": data["key"],
-               "storage-val": data["value"],
-               "command": command,
-               "result": True,
-               "error": ""
-           }
-           return jsonify(keypair)
-    elif request.method == "PUT":
-        command = "Update " + data["key"] + "/" + data["value"]
-        key = data["key"]
-        value = data["value"]
-        if r.exists(data["key"]):
-            r.set(key,value)
-            keypair = {
-               "storage-key": data["key"],
-               "storage-val": data["value"],
-               "command": command,
-               "result": True,
-               "error": ""
-           }
-            return jsonify(keypair)
-        else:
-            keypair_notfound = {
-               "storage-key": data["key"],
-               "storage-val": data["value"],
-               "command": command,
-               "result": False,
-               "error": "Key does not exist"
-           } 
-            return jsonify(keypair_notfound), abort(404)
-
-
-@app.route("/keyval/<string:inputval>", methods=["GET", "DELETE"])
+@app.route("/keyval/<string:inputval>", methods=["GET", "POST", "DELETE"])
 def getKeyval(inputval):
     
     if request.method =="GET":
@@ -227,6 +172,29 @@ def getKeyval(inputval):
                "error": "Key does not exist"
            }
              return jsonify(keypair_notfound), abort(404)
+
+    elif request.method == "POST":
+        command = "Store the following value for key: " + inputval
+        data = request.get_json()
+        if data:
+            r.set(inputval, data['value'])
+            keypair_stored = {
+               "storage-key": inputval,
+               "storage-val": data['value'],
+               "command": command,
+               "result": True,
+               "error": ""
+           }
+            return jsonify(keypair_stored)
+        else:
+            keypair_notstored = {
+               "storage-key": inputval,
+               "storage-val": "Not stored",
+               "command": command,
+               "result": False,
+               "error": "Invalid data format"
+           }
+            return jsonify(keypair_notstored), abort(400)
 
     elif request.method == "DELETE":
         command = "Delete the stored value for key: " + inputval
