@@ -150,7 +150,7 @@ def slack_alert(post):
 
 
 @app.route("/keyval", methods=[ "POST", "PUT"])
-def postKeyval():
+def set():
     data = request.get_json()
     
     if request.method == 'POST':
@@ -204,7 +204,7 @@ def postKeyval():
 
 
 @app.route("/keyval/<string:inputval>", methods=["GET", "DELETE"])
-def getKeyval(inputval):
+def get(inputval):
     
     if request.method =="GET":
         command = "READ value for the following key: " + inputval
