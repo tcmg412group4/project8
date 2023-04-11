@@ -1,12 +1,10 @@
 version: '3.8'
 services:
-  web: 
+  myapi: 
     build: .
     ports:
       - "4000:4000"
     depends_on:
-      - redis
-  redis:
+      - myredis
+  myredis:
     image: redis:latest
-    ports:
-      - "6379:6379"
