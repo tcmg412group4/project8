@@ -252,5 +252,5 @@ def getKeyval(inputval):
             return jsonify(keypair_notfound), abort(404)
 
    
-if __name__ == "__main__":                                  # debug mode for testing, port 4000 as per assignment instructions
+if __name__ == "__main__":                                  # debug mode for testing, port 4000 as stated assignment instructions
     app.run(host='0.0.0.0',port=4000, debug=True)
