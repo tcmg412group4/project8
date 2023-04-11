@@ -203,53 +203,79 @@ def set():
             return jsonify(keypair_notfound), abort(404)
 
 
-@app.route("/keyval/<string:inputval>", methods=["GET", "DELETE"])
-def get(inputval):
+@app.route("/keyval/<string:s1>", methods='GET')
+def kv_get(s1):
     
-    if request.method =="GET":
-        command = "READ value for the following key: " + inputval
-        if r.exists(inputval):
-            value = r.get(inputval)
-            keypair = {
-               "storage-key": inputval,
-               "storage-val": value,
-               "command": command,
-               "result": True,
-               "error": ""
-           }
-            return jsonify(keypair)
-        else:
-             keypair_notfound = {
-               "storage-key": inputval,
-               "storage-val": "Not found",
-               "command": command,
-               "result": False,
-               "error": "Key does not exist"
-           }
-             return jsonify(keypair_notfound), abort(404)
+    if r.exist(s1):
+        r_val = r.get(s1)
+    
+    #if the value exist, success:
+        return jsonify(
+                key=s1,             #user str
+                value=r_val,
+                command=f"GET {s1}",
+                result=True,
+                error= ""
+        ), 200
 
-    elif request.method == "DELETE":
-        command = "Delete the stored value for key: " + inputval
-        if r.exists(inputval) == 1: # 1 is True
-            value = r.get(inputval)
-            r.delete(inputval)
-            keypair_deleted = {
-               "storage-key": inputval,
-               "storage-val": value,
-               "command": command,
-               "result": True,
-               "error": "Key pair was found and deleted from database"
-           }
-            return jsonify(keypair_deleted)
-        else:
-            keypair_notfound = {
-               "storage-key": inputval,
-               "storage-val": "Not found",
-               "command": command,
-               "result": False,
-               "error": "Unable to delete key: Key does not exist"
-           }
-            return jsonify(keypair_notfound), abort(404)
+    #if invalid                             ****************************************************88
+        # return jsonify(
+		# 	key=s1,
+		# 	value=None,                 #not sure
+		# 	command=f"GET {s1}",
+		# 	result=False,
+		# 	error= "Key is invalid"
+		# ), 400
+    
+    else:
+    #if does not exist
+        return jsonify(
+			key=s1,
+			value=None,
+			command=f"GET {s1}",
+			result=False,
+			error= "Key does not exists"
+		), 404
+
+#delete
+
+@app.route("/keyval/<string:s1>", methods='DELETE')
+def kv_delete(s1):
+    #errors 404, 400 ; success 200
+    
+    if r.exists(s1) == 1:
+        r_val = r.get(s1)
+        
+        r.delete(s1)
+        
+        #if success
+        return jsonify(
+			key=s1,
+			value=r_val,
+			command=f"DELETE {s1}",
+			result=True,
+			error= ""
+		), 200
+	
+    #if invalid                             **********************************************************************
+		# return jsonify(
+		# 	key=s1, 
+		# 	value=None,                             #not sure
+		# 	command=f"DELETE {s1}",
+		# 	result=False, 
+		# 	error="Key is invalid"
+		# ), 400
+    
+    else:
+    #if does not exist
+        return jsonify(
+		    key=s1, 
+		    value=None, 
+		    command=f"DELETE {s1}",
+		    result=False, 
+		    error="Key does not exist"
+		), 404
+
 
    
 if __name__ == "__main__":                                  # debug mode for testing, port 4000 as per assignment instructions
