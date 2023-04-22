@@ -7,18 +7,33 @@ import os
 import socket
 import json 
 
+<<<<<<< Updated upstream
 app = Flask(__name__)
 cache = redis.Redis(host='redis', port=6379)
+=======
+
+r = Redis(host="redis", port=6379, db=0, decode_responses=True)
+
+
+app = Flask(__name__)
+>>>>>>> Stashed changes
 
 slackURL = "https://hooks.slack.com/services/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" 
 
 #default local host page
+<<<<<<< Updated upstream
 @app.route('/')
+=======
+@app.route("/")
+>>>>>>> Stashed changes
 
 def hello_world():
     return "<p>Howdy! We are Group 4. This is our API.</p>"
 
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 #MD5
 @app.route("/md5/<string:strvalue>")
 
@@ -146,6 +161,7 @@ def slack_alert(post):
         )
 
 
+<<<<<<< Updated upstream
 @app.route("/keyval", methods=[ "POST", "PUT"])
 def postKeyval():
     data = request.get_json()
@@ -201,12 +217,20 @@ def postKeyval():
 
 
 @app.route("/keyval/<string:inputval>", methods=["GET", "DELETE"])
+=======
+@app.route("/keyval/<string:inputval>", methods=["GET", "POST", "DELETE"])
+>>>>>>> Stashed changes
 def getKeyval(inputval):
     
     if request.method =="GET":
         command = "READ value for the following key: " + inputval
+<<<<<<< Updated upstream
         if cache.exists(inputval):
             value = cache.get(inputval)
+=======
+        if r.exists(inputval):
+            value = r.get(inputval)
+>>>>>>> Stashed changes
             keypair = {
                "storage-key": inputval,
                "storage-val": value,
@@ -225,11 +249,42 @@ def getKeyval(inputval):
            }
              return jsonify(keypair_notfound), abort(404)
 
+<<<<<<< Updated upstream
     elif request.method == "DELETE":
         command = "Delete the stored value for key: " + inputval
         if cache.exists(inputval) == 1: # 1 is True
             value = cache.get(inputval)
             cache.delete(inputval)
+=======
+    elif request.method == "POST":
+        command = "Store the following value for key: " + inputval
+        data = request.get_json()
+        if data:
+            r.set(inputval, data['value'])
+            keypair_stored = {
+               "storage-key": inputval,
+               "storage-val": data['value'],
+               "command": command,
+               "result": True,
+               "error": ""
+           }
+            return jsonify(keypair_stored)
+        else:
+            keypair_notstored = {
+               "storage-key": inputval,
+               "storage-val": "Not stored",
+               "command": command,
+               "result": False,
+               "error": "Invalid data format"
+           }
+            return jsonify(keypair_notstored), abort(400)
+
+    elif request.method == "DELETE":
+        command = "Delete the stored value for key: " + inputval
+        if r.exists(inputval) == 1: # 1 is True
+            value = r.get(inputval)
+            r.delete(inputval)
+>>>>>>> Stashed changes
             keypair_deleted = {
                "storage-key": inputval,
                "storage-val": value,
@@ -249,5 +304,9 @@ def getKeyval(inputval):
             return jsonify(keypair_notfound), abort(404)
 
    
+<<<<<<< Updated upstream
 if __name__ == "__main__":                                  # debug mode for testing, port 4000 as stated assignment instructions
+=======
+if __name__ == "__main__":                                  # debug mode for testing, port 4000 as per assignment instructions
+>>>>>>> Stashed changes
     app.run(host='0.0.0.0',port=4000, debug=True)
